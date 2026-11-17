@@ -312,6 +312,9 @@ footer.note { color: var(--muted); font-size: 13px; padding-block: 8px 32px; }
       <label class="fld"><span>תאריך חתימה</span><input type="date" id="signDate"></label>
       <div class="set-h">פרטי הבקשה</div>
       <label class="fld"><span>תיאור הטובין (טקסט חופשי)</span><input type="text" id="goodsDescription" placeholder="למשל: תבלינים"></label>
+      <label class="fld"><span>ערך משלוח כולל ומשקל נטו</span>
+        <select id="invoiceBasis"><option value="first">לפי החשבונית הראשונה (/1), כמו באקסל שהוגש</option><option value="all">סכום כל חשבוניות המשלוח</option></select>
+      </label>
       <div class="att" id="attachments"></div>
       <div class="set-h">קריאת המסמכים</div>
       <label class="fld"><span>רמת דיוק</span>

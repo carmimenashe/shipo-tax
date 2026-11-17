@@ -19,6 +19,7 @@
       goodsDescription: '',
       attachments: S.DEFAULT_ATTACHMENTS.map((a) => ({ ...a })),
       tier: 'default',
+      invoiceBasis: 'first',
       signDate: null,
     };
   }
@@ -278,6 +279,7 @@
   }
 
   function upsert(s) {
+    C.applyInvoiceBasis(s, state.settings.invoiceBasis || 'first');
     const k = C.awbKey(s.awb);
     let idx = k ? state.shipments.findIndex((o) => C.awbKey(o.awb) === k) : -1;
     if (idx < 0 && s.exportDecl) idx = state.shipments.findIndex((o) => o.exportDecl && o.exportDecl === s.exportDecl);
@@ -522,7 +524,10 @@
       const f = t.dataset.f;
       const type = t.dataset.t;
       const raw = t.value;
-      if (type === 'num') s[f] = C.num(raw);
+      if (type === 'num') {
+        s[f] = C.num(raw);
+        if (f === 'invoiceTotal' || f === 'netKg') s.totalsEdited = true;
+      }
       else if (type === 'date') s[f] = C.parseDate(raw);
       else if (type === 'parts') {
         const parts = raw.split('+').map(C.num).filter((n) => n !== null);
@@ -644,6 +649,7 @@
     $('goodsDescription').value = st.goodsDescription || '';
     $('signDate').value = st.signDate || '';
     $('tier').value = st.tier || 'default';
+    $('invoiceBasis').value = st.invoiceBasis || 'first';
     const atts = st.attachments && st.attachments.length ? st.attachments : S.DEFAULT_ATTACHMENTS.map((a) => ({ ...a }));
     st.attachments = atts;
     $('attachments').innerHTML = '<div class="set-h" style="margin:0">מסמכים מצורפים (מסומנים בטופס)</div>' + atts.map((a, i) =>
@@ -657,6 +663,12 @@
     else if (t.id === 'goodsDescription') st.goodsDescription = t.value;
     else if (t.id === 'signDate') st.signDate = t.value || null;
     else if (t.id === 'tier') st.tier = t.value;
+    else if (t.id === 'invoiceBasis') {
+      if (ev.type !== 'change') return;
+      st.invoiceBasis = t.value;
+      state.shipments.forEach((s) => C.applyInvoiceBasis(s, st.invoiceBasis));
+      renderAll();
+    }
     else if (t.id === 'apiKey') return;
     else {
       for (const [prefix, group] of SET_FIELDS) {

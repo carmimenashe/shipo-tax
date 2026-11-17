@@ -113,3 +113,33 @@ test('imports the hand-filled template', { skip: !REAL || !existsSync(REAL) }, a
   }
   console.log(JSON.stringify({ n: res.shipments.length, year: res.year, q: res.q, signer: !!res.signerName, first: res.shipments[0] }, null, 1).slice(0, 1500));
 });
+
+test('invoice basis: main invoice by default, sum on request, typed values kept', () => {
+  const x = {
+    awb_number: '700 12345678', invoice_numbers: ['WT24001234/2', 'WT24001234/1'], invoice_total: 99, net_weight_kg: 1,
+    invoices: [
+      { number: 'WT24001234/2', total: 1259.48, currency: 'USD', net_weight_kg: 32 },
+      { number: 'WT24001234/1', total: 24991.15, currency: 'USD', net_weight_kg: 3291 },
+    ],
+  };
+  const s = C.fromExtraction(x, []);
+  C.applyInvoiceBasis(s, 'first');
+  assert.equal(s.invoiceTotal, 24991.15);
+  assert.equal(s.netKg, 3291);
+  assert.equal(s.invoiceNo, 'WT24001234/1/2');
+  C.applyInvoiceBasis(s, 'all');
+  assert.equal(s.invoiceTotal, 26250.63);
+  assert.equal(s.netKg, 3323);
+  s.totalsEdited = true;
+  s.invoiceTotal = 1;
+  C.applyInvoiceBasis(s, 'first');
+  assert.equal(s.invoiceTotal, 1);
+  // no invoice list (e.g. loaded from Excel): values untouched
+  const t = C.normalizeShipment({ invoiceTotal: 500, netKg: 10 });
+  C.applyInvoiceBasis(t, 'all');
+  assert.equal(t.invoiceTotal, 500);
+  // survives a save/load round trip
+  const back = C.normalizeShipment(JSON.parse(JSON.stringify(s)));
+  assert.equal(back.invoices.length, 2);
+  assert.equal(back.totalsEdited, true);
+});

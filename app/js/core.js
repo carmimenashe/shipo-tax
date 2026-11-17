@@ -222,6 +222,7 @@
     return {
       id: newId(),
       exportDecl: '', invoiceNo: '', invoiceDate: null, invoiceTotal: null, invoiceCurrency: '',
+      invoices: [], totalsEdited: false,
       eligibleValue: null, eligibleParts: [], eligibleCurrency: '',
       incoterm: '', grossKg: null, netKg: null, eur1: '', awb: '', container: '',
       loadingDate: null, im4: '', releaseDate: null, destCountry: '', port: '',
@@ -282,6 +283,14 @@
     s.source = raw.source || 'manual';
     s.included = raw.included !== false;
     s.fileClaimTotal = num(raw.fileClaimTotal);
+    s.invoices = (raw.invoices || []).map((inv) => ({
+      no: String(inv.no ?? inv.number ?? '').trim(),
+      total: num(inv.total),
+      currency: normCurrency(inv.currency),
+      netKg: num(inv.netKg ?? inv.net_weight_kg),
+    })).filter((inv) => inv.no || inv.total !== null);
+    s.totalsEdited = !!raw.totalsEdited;
+    s.edited = !!raw.edited;
     return s;
   }
 
@@ -295,6 +304,7 @@
       invoiceNo: Array.isArray(x.invoice_numbers) ? joinInvoiceNumbers(x.invoice_numbers) : x.invoice_numbers,
       invoiceDate: x.invoice_date,
       invoiceTotal: x.invoice_total,
+      invoices: x.invoices,
       invoiceCurrency: x.invoice_currency,
       eligibleParts: x.eligible_export_value_parts,
       eligibleValue: x.eligible_export_value,
@@ -319,6 +329,36 @@
       source: 'ai',
     };
     return normalizeShipment(raw);
+  }
+
+  /** Main invoice first: WT24001234/1 before WT24001234/2. */
+  function sortedInvoices(s) {
+    const part = (no) => { const m = String(no).match(/\/(\d+)$/); return m ? +m[1] : 0; };
+    return s.invoices.slice().sort((a, b) => String(a.no).replace(/\/\d+$/, '').localeCompare(String(b.no).replace(/\/\d+$/, '')) || part(a.no) - part(b.no));
+  }
+
+  /**
+   * "ערך משלוח כולל למכס" and the net weight, from the shipment's duty invoices:
+   *   basis "first" — the main invoice only (as in the Excel that was filed)
+   *   basis "all"   — the sum of all the shipment's duty invoices
+   * Leaves the values alone when there is no invoice list or the user typed them.
+   */
+  function applyInvoiceBasis(s, basis = 'first') {
+    if (!s.invoices || !s.invoices.length || s.totalsEdited) return s;
+    const list = sortedInvoices(s);
+    if (basis === 'all') {
+      const cur = list[0].currency || s.invoiceCurrency;
+      const same = list.filter((i) => !i.currency || i.currency === cur);
+      s.invoiceTotal = same.some((i) => i.total !== null) ? round2(sum(same.map((i) => i.total))) : s.invoiceTotal;
+      s.netKg = list.some((i) => i.netKg !== null) ? round2(sum(list.map((i) => i.netKg))) : s.netKg;
+      if (cur) s.invoiceCurrency = cur;
+    } else {
+      const first = list[0];
+      if (first.total !== null) s.invoiceTotal = first.total;
+      if (first.netKg !== null) s.netKg = first.netKg;
+      if (first.currency) s.invoiceCurrency = first.currency;
+    }
+    return s;
   }
 
   const claimTotal = (s) => round2(sum(s.classifications.map((c) => c.duty)));
@@ -371,7 +411,8 @@
     if (s.eligibleParts.length && s.eligibleValue !== null && Math.abs(sum(s.eligibleParts) - s.eligibleValue) > 0.05) {
       add('warn', 'eligibleValue', 'ערך היצוא הזכאי אינו שווה לסכום השורות שלו');
     }
-    if (s.eligibleValue !== null && s.invoiceTotal !== null && s.eligibleCurrency === s.invoiceCurrency && s.eligibleValue > s.invoiceTotal + 0.01) {
+    const shipmentTotal = s.invoices.length ? round2(sum(s.invoices.filter((i) => !i.currency || i.currency === s.invoiceCurrency).map((i) => i.total))) : s.invoiceTotal;
+    if (s.eligibleValue !== null && shipmentTotal !== null && s.eligibleCurrency === s.invoiceCurrency && s.eligibleValue > shipmentTotal + 0.01) {
       add('warn', 'eligibleValue', 'ערך היצוא הזכאי גבוה מערך המשלוח הכולל');
     }
     if (s.grossKg !== null && s.netKg !== null && s.netKg > s.grossKg) add('warn', 'netKg', 'המשקל הנטו גבוה מהברוטו');
@@ -631,7 +672,7 @@
     quarterOf, quarterRange, quarterLabel, shipmentDate, suggestQuarter,
     normHs, normAwb, awbKey, im4Short, normCurrency, joinInvoiceNumbers,
     emptyShipment, emptyClassification, normalizeShipment, normClassification, fromExtraction,
-    claimTotal, customsValueTotal,
+    claimTotal, customsValueTotal, applyInvoiceBasis, sortedInvoices,
     validateShipment, issueCounts,
     sortShipments, summarize, fmtByCurrency,
     groupPages, exampleData,

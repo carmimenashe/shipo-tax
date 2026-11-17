@@ -66,9 +66,11 @@ Build the row by these rules:
 - awb_number: the shipment's air waybill number as "700 12345678" (3 digits, space, 8 digits).
 - export_declaration_number: the 9-digit "מספר הצהרה לדיווח מע\\"מ" from the Israeli export declaration.
 - invoice_numbers: the exporter duty invoices of this shipment that are in the documents (e.g. ["WT24001234/1","WT24001234/2"]); not invoices that are only referenced.
-- invoice_date: the duty invoice date (its flight date). invoice_total / invoice_currency: the sum of the duty invoices' totals, in the currency of their Total column.
+- invoice_date: the duty invoice date (its flight date).
+- invoices: one entry per duty invoice of this shipment: {number, total (its Total column), currency (of the Total column), net_weight_kg (its total weight)}.
+- invoice_total / invoice_currency: the total of the main invoice (the one numbered /1, or the only one), in the currency of its Total column.
 - incoterm: terms of trade as printed (e.g. "C&F").
-- gross_weight_kg: from the air waybill. net_weight_kg: total weight of the duty invoices.
+- gross_weight_kg: from the air waybill. net_weight_kg: the total weight of the main invoice.
 - loading_date: the air waybill execution or flight date; if missing, the export declaration loading date.
 - im4_number: the MRN of the EU import declaration (box A). release_date: its date. If there are several MRNs, use the one that carries the duty and mention the others in issues.
 - destination_country: the country of the EU customs office that charged the duty, in Hebrew (בלגיה, הולנד, גרמניה, צרפת, …). port: that office's city or airport in Latin capitals (e.g. LIEGE).
@@ -85,7 +87,7 @@ Build the row by these rules:
 Use only values found in the documents and never invent numbers. Use null for anything you cannot find.
 
 Reply with JSON only, with exactly these keys:
-{"awb_number":"","export_declaration_number":"","invoice_numbers":[],"invoice_date":"","invoice_total":0,"invoice_currency":"","incoterm":"","gross_weight_kg":0,"net_weight_kg":0,"eur1_number":"","container_number":"","loading_date":"","im4_number":"","release_date":"","destination_country":"","port":"","classifications":[{"hs_code":"","description":"","growing_site":"","growing_zip":"","net_weight_kg":0,"customs_value":0,"duty_rate_percent":0,"duty_amount":0}],"eligible_export_value_parts":[],"eligible_export_value":0,"eligible_export_value_currency":"","duty_currency":"","duty_total_on_documents":null,"duty_payment_evidence":"","issues":[]}
+{"awb_number":"","export_declaration_number":"","invoice_numbers":[],"invoice_date":"","invoices":[{"number":"","total":0,"currency":"","net_weight_kg":0}],"invoice_total":0,"invoice_currency":"","incoterm":"","gross_weight_kg":0,"net_weight_kg":0,"eur1_number":"","container_number":"","loading_date":"","im4_number":"","release_date":"","destination_country":"","port":"","classifications":[{"hs_code":"","description":"","growing_site":"","growing_zip":"","net_weight_kg":0,"customs_value":0,"duty_rate_percent":0,"duty_amount":0}],"eligible_export_value_parts":[],"eligible_export_value":0,"eligible_export_value_currency":"","duty_currency":"","duty_total_on_documents":null,"duty_payment_evidence":"","issues":[]}
 
 Documents of this shipment:
 `;

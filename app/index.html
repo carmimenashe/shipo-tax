@@ -1,0 +1,344 @@
+<title>בקשת שיפוי רבעונית</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Frank+Ruhl+Libre:wght@700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one working column — documents in, review table, outputs — under a stamped header band. */
+:root {
+  --bg: #f3f5f7;
+  --surface: #ffffff;
+  --sunk: #eaeef2;
+  --ink: #18222e;
+  --muted: #5a6674;
+  --line: #d6dce3;
+  --accent: #1d3f9e;
+  --accent-ink: #ffffff;
+  --accent-soft: #e6ebf8;
+  --ok: #1d7a4b;
+  --ok-soft: #e3f3ea;
+  --warn: #9a5b00;
+  --warn-soft: #fdf0d9;
+  --err: #b42318;
+  --err-soft: #fde7e5;
+  --font-display: 'Frank Ruhl Libre', 'David', 'Times New Roman', serif;
+  --font-body: 'Assistant', 'Segoe UI', 'Arial Hebrew', Arial, sans-serif;
+  --font-data: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --radius: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10151b; --surface: #171e26; --sunk: #1d2630; --ink: #e5e9ee; --muted: #9aa6b3; --line: #2b3541;
+    --accent: #8fa6ff; --accent-ink: #0d1530; --accent-soft: #1e2847;
+    --ok: #5cc98f; --ok-soft: #17301f; --warn: #f0b45a; --warn-soft: #34270f; --err: #ff8a80; --err-soft: #3a1a18;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10151b; --surface: #171e26; --sunk: #1d2630; --ink: #e5e9ee; --muted: #9aa6b3; --line: #2b3541;
+  --accent: #8fa6ff; --accent-ink: #0d1530; --accent-soft: #1e2847;
+  --ok: #5cc98f; --ok-soft: #17301f; --warn: #f0b45a; --warn-soft: #34270f; --err: #ff8a80; --err-soft: #3a1a18;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  direction: rtl;
+}
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.mono, .num { font-family: var(--font-data); font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
+h1, h2 { font-family: var(--font-display); font-weight: 700; text-wrap: balance; margin: 0; }
+h2 { font-size: 21px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* header */
+.top { border-bottom: 1px solid var(--line); background: var(--surface); }
+.top .wrap { display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding-block: 18px; }
+.brand { display: flex; gap: 14px; align-items: center; min-width: 0; }
+.stamp {
+  width: 52px; height: 52px; flex: none; border: 2px solid var(--accent); border-radius: 50%; color: var(--accent);
+  display: grid; place-items: center; font-family: var(--font-display); font-size: 13px; line-height: 1.05; text-align: center;
+  transform: rotate(-8deg);
+}
+.stamp b { display: block; font-size: 17px; }
+h1 { font-size: 26px; }
+.brand p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+.quarter { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.quarter label { color: var(--muted); font-size: 13px; }
+select, input[type="text"], input[type="number"], input[type="date"], input[type="password"], textarea {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; min-width: 0;
+}
+select { padding-left: 28px; }
+.engine { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 4px 10px; border-radius: 999px; background: var(--sunk); color: var(--muted); }
+.engine::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.engine.on { color: var(--ok); background: var(--ok-soft); }
+.engine.off { color: var(--warn); background: var(--warn-soft); }
+
+/* KPI strip */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-block: 20px 8px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; min-width: 0; }
+.kpi .k { color: var(--muted); font-size: 13px; letter-spacing: .01em; }
+.kpi .v { font-family: var(--font-data); font-size: 22px; font-weight: 500; direction: ltr; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi.main { border-color: var(--accent); box-shadow: inset 0 -3px 0 var(--accent); }
+.kpi.alert .v { color: var(--err); }
+
+.banner { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: var(--accent-soft); border: 1px dashed var(--accent); border-radius: var(--radius); padding: 10px 14px; margin-top: 16px; }
+
+/* sections */
+section.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-block: 16px; }
+.sec-head { display: flex; gap: 12px; align-items: baseline; justify-content: space-between; flex-wrap: wrap; margin-bottom: 12px; }
+.sec-head p { margin: 0; color: var(--muted); font-size: 14px; }
+.step { font-family: var(--font-data); color: var(--accent); font-size: 13px; margin-left: 6px; }
+
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 8px 14px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn.danger { color: var(--err); }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+.btn.small { padding: 4px 10px; font-size: 13px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* dropzone */
+.drop { display: block; border: 2px dashed var(--line); border-radius: var(--radius); padding: 22px; text-align: center; background: var(--sunk); cursor: pointer; transition: border-color .15s, background .15s; }
+.drop.over, .drop:hover { border-color: var(--accent); background: var(--accent-soft); }
+.drop strong { display: block; font-size: 17px; }
+.drop span { color: var(--muted); font-size: 14px; }
+.files { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 6px; }
+.file { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; }
+.file .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; unicode-bidi: plaintext; text-align: right; }
+.file .st { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.file .st.err { color: var(--err); }
+.file .st.done { color: var(--ok); }
+.bar { grid-column: 1 / -1; height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+.status-line { margin-top: 10px; color: var(--muted); font-size: 14px; min-height: 1.5em; }
+
+/* table */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; }
+table.ships { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 860px; }
+.ships th { background: var(--sunk); color: var(--muted); font-weight: 600; font-size: 13px; text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.ships td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.ships tr.ship { cursor: pointer; }
+.ships tr.ship:hover td { background: var(--accent-soft); }
+.ships tr.ship.open td { background: var(--accent-soft); }
+.ships tr.excluded td { opacity: .5; }
+.ships td.money { text-align: left; }
+.chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.chip { font-family: var(--font-data); font-size: 12px; padding: 1px 6px; border-radius: 4px; background: var(--sunk); direction: ltr; }
+.pill { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.ok { color: var(--ok); background: var(--ok-soft); }
+.pill.warn { color: var(--warn); background: var(--warn-soft); }
+.pill.err { color: var(--err); background: var(--err-soft); }
+.ships tfoot td { font-weight: 700; background: var(--sunk); }
+.empty { padding: 28px; text-align: center; color: var(--muted); }
+
+/* editor */
+.editor td { background: var(--bg); padding: 16px; }
+.ed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 14px; }
+.fld { display: grid; gap: 3px; min-width: 0; }
+.fld span { font-size: 12.5px; color: var(--muted); }
+.fld input, .fld select { width: 100%; }
+.fld.bad input { border-color: var(--err); }
+.ed-h { font-weight: 700; margin: 16px 0 8px; font-size: 14px; }
+.cls-wrap { overflow-x: auto; }
+table.cls { border-collapse: collapse; width: 100%; min-width: 820px; font-size: 13px; }
+.cls th { text-align: right; color: var(--muted); font-weight: 600; padding: 4px 6px; }
+.cls td { padding: 3px 4px; }
+.cls input { width: 100%; padding: 5px 6px; }
+.issues { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.issues li { padding: 6px 10px; border-radius: 6px; font-size: 14px; }
+.issues li.error { background: var(--err-soft); color: var(--err); }
+.issues li.warn { background: var(--warn-soft); color: var(--warn); }
+.issues li.info { background: var(--sunk); color: var(--muted); }
+.src { color: var(--muted); font-size: 13px; }
+
+/* outputs */
+.outs { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.out { border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.out h3 { margin: 0; font-size: 16px; }
+.out p { margin: 0; color: var(--muted); font-size: 14px; }
+.preview { display: flex; gap: 14px; overflow-x: auto; padding: 12px 2px 4px; }
+.sheet { flex: none; width: 278px; height: 393px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 1px 4px rgba(0,0,0,.08); background: #fff; position: relative; }
+.sheet > .scaler { transform: scale(.35); transform-origin: top right; position: absolute; top: 0; right: 0; }
+
+/* settings */
+details.card summary { cursor: pointer; font-family: var(--font-display); font-size: 19px; font-weight: 700; }
+details.card[open] summary { margin-bottom: 12px; }
+.set-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px 14px; }
+.set-h { grid-column: 1 / -1; font-weight: 700; margin-top: 8px; }
+.att { display: grid; gap: 6px; grid-column: 1 / -1; }
+.att label { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
+
+.toast { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 6px; font-size: 14px; z-index: 20; max-width: calc(100% - 32px); }
+footer.note { color: var(--muted); font-size: 13px; padding-block: 8px 32px; }
+
+@media (max-width: 720px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  h1 { font-size: 22px; }
+  .kpi .v { font-size: 18px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <div class="stamp" aria-hidden="true"><div>שיפוי<b id="stampQ">Q4</b></div></div>
+      <div>
+        <h1>בקשת שיפוי רבעונית</h1>
+        <p>הקרן לשיפוי יצואנים בגין פגיעה בהסכמי סחר · מסמכי משלוח ← טבלת אקסל ודף סיכום</p>
+      </div>
+    </div>
+    <div class="quarter">
+      <label for="qYear">שנה</label>
+      <select id="qYear"></select>
+      <label for="qQuarter">רבעון</label>
+      <select id="qQuarter">
+        <option value="1">I · ינואר–מרץ</option>
+        <option value="2">II · אפריל–יוני</option>
+        <option value="3">III · יולי–ספטמבר</option>
+        <option value="4">IV · אוקטובר–דצמבר</option>
+      </select>
+      <span id="engine" class="engine">בודק חיבור…</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="exampleBanner" class="banner" hidden>
+    <span>מוצגים <b>נתוני דוגמה בדויים</b> כדי להראות איך הכלי עובד. כשתעלו מסמכים או תטענו אקסל, הדוגמה תימחק.</span>
+    <button class="btn small" id="clearExample" type="button">נקה את הדוגמה</button>
+  </div>
+
+  <div class="kpis" aria-live="polite">
+    <div class="kpi main"><div class="k">סה"כ שיפוי מבוקש</div><div class="v" id="kDuty">0.00</div></div>
+    <div class="kpi"><div class="k">משלוחים ברבעון</div><div class="v" id="kCount">0</div></div>
+    <div class="kpi"><div class="k">ערך למכס (פריטים זכאים)</div><div class="v" id="kValue">0.00</div></div>
+    <div class="kpi" id="kIssuesBox"><div class="k">דורש בדיקה</div><div class="v" id="kIssues">0</div></div>
+  </div>
+
+  <section class="card" id="docs">
+    <div class="sec-head">
+      <h2><span class="step">1</span>מסמכים</h2>
+      <p>קובץ PDF לכל משלוח (רשימון יצוא, שטר מטען, חשבון עסקה, רשימת אריזה, IM4, הוכחת תשלום), או מסמכים בנפרד. אפשר גם לטעון אקסל שכבר מולא.</p>
+    </div>
+    <label class="drop" id="drop" for="fileInput">
+      <strong>גררו לכאן קבצים או לחצו לבחירה</strong>
+      <span>PDF, JPG, PNG · אקסל (xlsx) של רבעון קיים · קובץ גיבוי (json)</span>
+    </label>
+    <input id="fileInput" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.xlsx,.json,application/pdf,image/*" hidden>
+    <ul class="files" id="fileList"></ul>
+    <div class="row" style="margin-top:12px">
+      <button class="btn primary" id="processBtn" type="button" disabled>קרא את המסמכים</button>
+      <button class="btn" id="stopBtn" type="button" hidden>עצור</button>
+      <button class="btn small" id="clearFiles" type="button" hidden>נקה רשימה</button>
+    </div>
+    <div class="status-line" id="statusLine"></div>
+  </section>
+
+  <section class="card" id="review">
+    <div class="sec-head">
+      <h2><span class="step">2</span>משלוחים ברבעון</h2>
+      <div class="row">
+        <button class="btn small" id="addManual" type="button">הוסף משלוח ידנית</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="ships">
+        <thead>
+          <tr>
+            <th>#</th><th>שטר מטען</th><th>תאריך טעינה</th><th>הצהרת יצוא</th><th>IM4</th><th>פרטי מכס</th>
+            <th>ערך למכס</th><th>שיפוי מבוקש</th><th>מצב</th>
+          </tr>
+        </thead>
+        <tbody id="shipRows"></tbody>
+        <tfoot id="shipFoot"></tfoot>
+      </table>
+    </div>
+    <p class="src" style="margin:8px 0 0">לחיצה על שורה פותחת אותה לעריכה. כל שינוי נשמר ומחושב מחדש מיד.</p>
+  </section>
+
+  <section class="card" id="outputs">
+    <div class="sec-head">
+      <h2><span class="step">3</span>הפקה</h2>
+      <p id="outNote"></p>
+    </div>
+    <div class="outs">
+      <div class="out">
+        <h3>טבלת אקסל ממולאת</h3>
+        <p>במבנה הגליון שהוגש: עמודה לכל שדה, עד 5 סיווגים בשורה, ונוסחאות לסכומים. כולל גליון ריכוז וגליון בקרות.</p>
+        <button class="btn primary" id="dlExcel" type="button">הורד אקסל</button>
+      </div>
+      <div class="out">
+        <h3>דף סיכום לרשות המסים</h3>
+        <p>טופס הבקשה ממולא ברמת הרבעון, עם נספח משלוחים ונספח לפי פרט מכס. PDF מוכן לחתימה.</p>
+        <button class="btn primary" id="dlSummary" type="button">הורד דף סיכום (PDF)</button>
+      </div>
+      <div class="out">
+        <h3>טופס לכל משלוח</h3>
+        <p>אותו טופס, ממולא בנפרד לכל משלוח, לצירוף לקובץ המסמכים של המשלוח.</p>
+        <button class="btn" id="dlForms" type="button">הורד טפסים (PDF)</button>
+      </div>
+      <div class="out">
+        <h3>גיבוי עבודה</h3>
+        <p>שומר את כל הנתונים, כולל מה שנקרא מכל עמוד, כדי להמשיך להוסיף מסמכים בהמשך הרבעון.</p>
+        <button class="btn" id="dlBackup" type="button">הורד גיבוי (JSON)</button>
+      </div>
+    </div>
+    <div class="preview" id="preview" aria-label="תצוגה מקדימה של דף הסיכום"></div>
+  </section>
+
+  <details class="card" id="settingsBox">
+    <summary>פרטי החברה, מגיש הבקשה והגדרות</summary>
+    <div class="set-grid" id="settingsForm">
+      <div class="set-h">פרטי החברה הפונה</div>
+      <label class="fld"><span>שם החברה</span><input type="text" id="co_name"></label>
+      <label class="fld"><span>מספר ח.פ (או ח.צ)</span><input type="text" id="co_id" inputmode="numeric"></label>
+      <label class="fld"><span>רחוב</span><input type="text" id="co_street"></label>
+      <label class="fld"><span>מס' בית</span><input type="text" id="co_houseNo"></label>
+      <label class="fld"><span>ישוב / עיר</span><input type="text" id="co_city"></label>
+      <label class="fld"><span>אזור תעשייה</span><input type="text" id="co_zone"></label>
+      <label class="fld"><span>מיקוד</span><input type="text" id="co_zip" inputmode="numeric"></label>
+      <label class="fld"><span>טלפון</span><input type="text" id="co_phone" inputmode="tel"></label>
+      <div class="set-h">מגיש הבקשה (מורשה חתימה)</div>
+      <label class="fld"><span>שם פרטי</span><input type="text" id="ap_firstName"></label>
+      <label class="fld"><span>שם משפחה</span><input type="text" id="ap_lastName"></label>
+      <label class="fld"><span>ת.ז</span><input type="text" id="ap_idNo" inputmode="numeric"></label>
+      <label class="fld"><span>תפקיד בחברה</span><input type="text" id="ap_role"></label>
+      <label class="fld"><span>טלפון</span><input type="text" id="ap_phone" inputmode="tel"></label>
+      <label class="fld"><span>תאריך חתימה</span><input type="date" id="signDate"></label>
+      <div class="set-h">פרטי הבקשה</div>
+      <label class="fld"><span>תיאור הטובין (טקסט חופשי)</span><input type="text" id="goodsDescription" placeholder="למשל: תבלינים"></label>
+      <label class="fld"><span>ערך משלוח כולל ומשקל נטו</span>
+        <select id="invoiceBasis"><option value="first">לפי החשבונית הראשונה (/1), כמו באקסל שהוגש</option><option value="all">סכום כל חשבוניות המשלוח</option></select>
+      </label>
+      <div class="att" id="attachments"></div>
+      <div class="set-h">קריאת המסמכים</div>
+      <label class="fld"><span>רמת דיוק</span>
+        <select id="tier"><option value="default">רגילה</option><option value="complex">גבוהה (איטי יותר)</option></select>
+      </label>
+      <label class="fld" id="apiKeyFld" hidden><span>מפתח Anthropic API (כשהכלי פתוח מחוץ ל-Claude)</span><input type="password" id="apiKey" autocomplete="off" placeholder="sk-ant-…"></label>
+    </div>
+    <p class="src">הפרטים נשמרים בדפדפן הזה בלבד.</p>
+  </details>
+
+  <footer class="note">
+    הנתונים נקראים מהמסמכים על ידי Claude ויש לבדוק אותם לפני ההגשה. הכלי מסמן חישובים שאינם מתאימים (ערך × אחוז מכס), סכומים שלא תואמים למסמכים, משלוחים מחוץ לרבעון וכפילויות.
+  </footer>
+</main>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="js/fonts.js"></script>
+<script src="js/core.js"></script>
+<script src="js/excel.js"></script>
+<script src="js/summary.js"></script>
+<script src="js/extract.js"></script>
+<script src="js/app.js"></script>
